@@ -1,0 +1,99 @@
+nginx is what I was assigned
+open ports needed, 80 for http, 443 for https and 22 for ssh purposes are as follows, for 80 normal web traffic, for 443, secure traffic, for 22 for server managing
+outbound ports is 80 443 and 53, with 80 and 443 being for internet and 53 for dns, with the purposes being 80 for package updates, 443 for ssl certificates, and 53 for domain name
+for security group, 80 and 443 are anywhere and 22 is admin ip, this would be inbound
+outbound, allow all
+firewall, use ufw, for example 
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw allow from ADMIN_IP to any port 22
+
+configuration
+main configurations for ngnix 
+/etc/nginx/nginx.conf
+/etc/nginx/sites-available/
+/etc/nginx/sites-enabled/
+
+create 2 site config files
+
+/etc/nginx/sites-available/site1.conf
+/etc/nginx/sites-available/site2.conf
+
+enabling them
+/etc/nginx/sites-enabled/
+each site gets its own block
+virtual hosts
+server {
+    listen 80;
+    server_name site1.example.com;
+
+    root /var/www/site1;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+
+server {
+    listen 80;
+    server_name site2.example.com;
+
+    root /var/www/site2;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+
+dns / host configuration
+site1.example.com → SERVER_IP
+site2.example.com → SERVER_IP
+modify within /etc/hosts
+
+ssl/tcs
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx (configures https)
+
+logs
+/var/log/nginx/access.log
+/var/log/nginx/error.log
+tail -f /var/log/nginx/access.log (this lets you view the log)
+
+location and access
+/var/www/
+/var/www/
+    site1/
+        index.html
+        assets/
+    site2/
+        index.html
+        assets/
+
+www-data
+
+sudo chown -R www-data:www-data /var/www/site1
+sudo chmod -R 755 /var/www/site1 (set file permissions)
+
+developer content updates, ftp 
+sudo groupadd webdev (create dev group)
+sudo usermod -aG webdev username
+sudo chown -R root:webdev /var/www
+sudo chmod -R 775 /var/www
+gives devs upload rights
+
+Internet
+   |
+Firewall (NACL / SG)
+   |
+Ports: 80 / 443
+   |
+Nginx
+   |
+Virtual Hosts
+   |        |
+site1      site2
+/var/www/site1
+/var/www/site2
+architecture final
